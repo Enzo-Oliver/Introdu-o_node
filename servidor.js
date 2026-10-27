@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const path = require("path")
+app.use(express.json())
+
 const eu = {
   nome: "Enzo de Oliveira Azevedo",
   curso: "Fullstack",
@@ -8,7 +10,7 @@ const eu = {
   cursosup: "ADS",
   contato: "(85) 98542-6804",
 };
-const produtos = [
+let produtos = [
     {
         id: 1,
         nome: "Mouse",
@@ -81,9 +83,47 @@ app.get("/usuario", (req, res) => {
 app.get("/produtos", (req, res) => {
     res.json(produtos)
 })
-
+// res.json(produtos[req.params.id-1][req.query.e])
 app.get("/produtos/:id", (req, res) => {
-    res.json(produtos[req.params.id-1][req.query.e])
+    if (req.query.e)(res.json(produtos[req.params.id-1][req.query.e]))
+        else res.json(produtos[req.params.id-1])
+})
+
+app.post("/produtos",(req,res)=>{
+    res.send("Funciona!")
+})
+
+// app.post("/produtos", (req, res) => {
+//     const novoProduto = req.body;
+
+//     produtos.push(novoProduto);
+
+//     res.json({
+//         mensagem: "Produto cadastrado com sucesso!",
+//         produto: novoProduto
+//     });
+// });
+
+app.post("/produtos", (req, res) => {
+    // produtos.push(req.body)
+    produtos.push({
+        id: produtos.length+1,
+        nome: req.body.nome,
+        preco: req.body.preco,
+        desc: req.body.desc
+    })
+    res.status(201).send(req.body)
+})
+
+app.delete("/produtos/:id", (req, res) => {
+    existe = produtos.filter((produto) => produto.id == req.params.id)
+    if (existe.length > 0) {
+        let listanova = produtos.filter((produto) => produto.id != req.params.id)
+        produtos = listanova
+    } else {
+        res.status(404).send("Não achei!") 
+    }
+    res.send("Apaguei!") 
 })
 
 app.listen(3000, () => {
