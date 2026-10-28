@@ -106,14 +106,17 @@ app.post("/produtos",(req,res)=>{
 
 app.post("/produtos", (req, res) => {
     // produtos.push(req.body)
-    produtos.push({
+    if(req.body.nome && req.body.preco && req.body.desc){
+        produtos.push({
         id: produtos.length+1,
         nome: req.body.nome,
         preco: req.body.preco,
         desc: req.body.desc
     })
     res.status(201).send(req.body)
-})
+} else {
+    res.status(400).send("Digite todas os campos")
+}})
 
 app.delete("/produtos/:id", (req, res) => {
     existe = produtos.filter((produto) => produto.id == req.params.id)
@@ -124,6 +127,18 @@ app.delete("/produtos/:id", (req, res) => {
         res.status(404).send("Não achei!") 
     }
     res.send("Apaguei!") 
+})
+
+app.patch("/produtos/:id", (req,res) => {
+    let encontrado = produtos.find((produto)=> produto.id == req.params.id)
+    if(encontrado){
+           encontrado.nome = req.query.nome
+           encontrado.preco = Number(req.query.preco)
+           encontrado.desc = req.query.desc
+           res.json(encontrado)
+    } else {
+        res.status(400).send("Não encontrei")
+    }
 })
 
 app.listen(3000, () => {
