@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const path = require("path")
+const fs = require("fs");
+const { log } = require("console");
 app.use(express.json())
 
 const eu = {
@@ -10,6 +12,7 @@ const eu = {
   cursosup: "ADS",
   contato: "(85) 98542-6804",
 };
+
 let produtos = [
     {
         id: 1,
@@ -42,6 +45,26 @@ let produtos = [
         desc: "Full HD"
     },
 ]
+
+function salvar(){
+    const dadosjson = JSON.stringify(produtos, null, 2)
+    fs.writeFile("usuario.json",dadosjson,'utf8',(err) => {
+        if (err){
+            console.error('Error writing to file', err);
+        } else {
+            console.log("Arquivo salvo!")
+        }
+    })
+}
+function ler(){
+    // fs.readFileSync("Usuario.json", (erro, dados) => {
+    //     if(erro) throw erro;
+    //     produtos = JSON.parse(dados)
+    //     console.log("Arquivo lido com sucesso");
+    // })
+    let dados = fs.readFileSync("Usuario.json")
+    produtos = JSON.parse(dados)
+    }
 
 app.get("/", (req, res) => {
   res.send(`
@@ -81,17 +104,19 @@ app.get("/usuario", (req, res) => {
 })
 
 app.get("/produtos", (req, res) => {
+    ler()
     res.json(produtos)
 })
 // res.json(produtos[req.params.id-1][req.query.e])
 app.get("/produtos/:id", (req, res) => {
+    ler()
     if (req.query.e)(res.json(produtos[req.params.id-1][req.query.e]))
         else res.json(produtos[req.params.id-1])
 })
 
-app.post("/produtos",(req,res)=>{
-    res.send("Funciona!")
-})
+// app.post("/produtos",(req,res)=>{
+//     res.send("Funciona!")
+// })
 
 // app.post("/produtos", (req, res) => {
 //     const novoProduto = req.body;
@@ -113,6 +138,7 @@ app.post("/produtos", (req, res) => {
         preco: req.body.preco,
         desc: req.body.desc
     })
+    salvar()
     res.status(201).send(req.body)
 } else {
     res.status(400).send("Digite todas os campos")
@@ -123,19 +149,24 @@ app.delete("/produtos/:id", (req, res) => {
     if (existe.length > 0) {
         let listanova = produtos.filter((produto) => produto.id != req.params.id)
         produtos = listanova
+        salvar()
     } else {
-        res.status(404).send("Não achei!") 
+        res.status(404).send("Não achei!")
     }
     res.send("Apaguei!") 
 })
 
 app.patch("/produtos/:id", (req,res) => {
     let encontrado = produtos.find((produto)=> produto.id == req.params.id)
+    
     if(encontrado){
-           encontrado.nome = req.query.nome
-           encontrado.preco = Number(req.query.preco)
-           encontrado.desc = req.query.desc
-           res.json(encontrado)
+        let novoproduto ={}
+        if(req.query.nome) novoproduto.nome = req.query.nome
+        if(req.query.preco) novoproduto.preco = Number(req.query.preco)
+        if(req.query.desc) novoproduto.desc = req.query.desc
+        Object.assign(encontrado, novoproduto)
+        salvar()
+        res.json(encontrado)
     } else {
         res.status(400).send("Não encontrei")
     }
@@ -144,3 +175,5 @@ app.patch("/produtos/:id", (req,res) => {
 app.listen(3000, () => {
   console.log("Servidor iniciado em http://localhost:3000");
 });
+
+// atividade: salvar a lista de produtos num arquivos chamado produtos.json e ler a lista sempre que fizer um get e atribuir á variavel produtos.

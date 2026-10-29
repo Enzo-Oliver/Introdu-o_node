@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nome": "Mouse",
+    "preco": 120,
+    "desc": "Mouse caro dms"
+  },
+  {
+    "id": 2,
+    "nome": "Teclado",
+    "preco": 20,
+    "desc": "Presta não"
+  },
+  {
+    "id": 3,
+    "nome": "Fone de ouvido",
+    "preco": 100,
+    "desc": "TWS Headphone frush frush"
+  },
+  {
+    "id": 4,
+    "nome": "Mousepad",
+    "preco": 12,
+    "desc": "Bem finin"
+  },
+  {
+    "id": 5,
+    "nome": "Tela Arzopa",
+    "preco": 600,
+    "desc": "Full HD"
+  },
+  {
+    "id": 6,
+    "nome": "mouse lula",
+    "preco": 13,
+    "desc": "o melhor do mundo"
+  }
+]
