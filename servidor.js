@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const path = require("path")
 const fs = require("fs");
-const { log } = require("console");
+const db = require('./database')
 app.use(express.json())
 
 const eu = {
@@ -13,38 +13,20 @@ const eu = {
   contato: "(85) 98542-6804",
 };
 
-let produtos = [
-    {
-        id: 1,
-        nome: "Mouse",
-        preco: 120,
-        desc: "Mouse caro dms"
-    },
-    {
-        id: 2,
-        nome: "Teclado",
-        preco: 20,
-        desc: "Presta não"
-    },
-    {
-        id: 3,
-        nome: "Fone de ouvido",
-        preco: 100,
-        desc: "TWS Headphone frush frush"
-    },
-    {
-        id: 4,
-        nome: "Mousepad",
-        preco: 12,
-        desc: "Bem finin"
-    },
-    {
-        id: 5,
-        nome: "Tela Arzopa",
-        preco: 600,
-        desc: "Full HD"
-    },
-]
+let produtos = []
+//ALL, GET(X), RUN
+
+const listarProdutos = db.prepare(`
+    SELECT * FROM produtos
+`)
+const listarUmProduto = db.prepare(`
+    SELECT * FROM produtos
+    WHERE id = ?
+`)
+const criarProduto = db.prepare(`
+    INSERT INTO produtos(nome, preco, desc)
+    VALUES(?, ?, ?)
+    `)
 
 function salvar(){
     const dadosjson = JSON.stringify(produtos, null, 2)
@@ -105,13 +87,21 @@ app.get("/usuario", (req, res) => {
 
 app.get("/produtos", (req, res) => {
     ler()
-    res.json(produtos)
+    const produtosdobanco = listarProdutos.all()
+    res.json(produtosdobanco)
 })
 // res.json(produtos[req.params.id-1][req.query.e])
+// app.get("/produtos/:id", (req, res) => {
+//     ler()
+//     if (req.query.e)(res.json(produtos[req.params.id-1][req.query.e]))
+//         else res.json(produtos[req.params.id-1])
+// })
+
 app.get("/produtos/:id", (req, res) => {
     ler()
-    if (req.query.e)(res.json(produtos[req.params.id-1][req.query.e]))
-        else res.json(produtos[req.params.id-1])
+    encontrado = listarUmProduto.get(req.params.id)
+    if (encontrado)(res.json(encontrado))
+        else res.send("Não encontrado")
 })
 
 // app.post("/produtos",(req,res)=>{
@@ -132,12 +122,13 @@ app.get("/produtos/:id", (req, res) => {
 app.post("/produtos", (req, res) => {
     // produtos.push(req.body)
     if(req.body.nome && req.body.preco && req.body.desc){
-        produtos.push({
-        id: produtos.length+1,
-        nome: req.body.nome,
-        preco: req.body.preco,
-        desc: req.body.desc
-    })
+    //     produtos.push({
+    //     id: produtos.length+1,
+    //     nome: req.body.nome,
+    //     preco: req.body.preco,
+    //     desc: req.body.desc
+    // })
+    const produtocriado = criarProduto.run(req.body.nome, req.body.preco,req.body.desc)
     salvar()
     res.status(201).send(req.body)
 } else {
